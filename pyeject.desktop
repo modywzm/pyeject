@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=pyeject
+Name[pl]=pyeject
+Comment=A frontend simple application for eject.
+Comment[pl]=A frontend simple application for eject.
+TryExec=pyeject
+Exec=pyeject
+Terminal=false
+Icon=drive-optical
+StartupNotify=true
+Type=Application
+Categories=GTK;Utility;
