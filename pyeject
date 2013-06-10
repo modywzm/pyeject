@@ -1,0 +1,177 @@
+#!/usr/bin/python2
+#-*- coding: utf-8 -*-
+
+# pyeject - A frontend simple application for eject.
+# Author: Marcin Kwapuliński <modywzm@gmail.com>
+
+try:
+    import gtk
+    import pygtk
+    pygtk.require('2.0')
+    import sys
+    import subprocess
+    import os.path
+    import os, ConfigParser
+    import gettext
+    import locale
+except:
+    print('ERROR : All required python dependencies were not found!')
+    sys.exit()
+
+VERSION = '0.1'
+LOCALE_DOMAIN = 'pyeject'
+LOCALE_DIR = os.path.join(sys.prefix, 'local', 'share', 'locale')
+DOC_DIR = os.path.join(sys.prefix, 'share', 'doc', LOCALE_DOMAIN, 'COPYING')
+CONFIGFILE = os.path.expanduser('~/.config/' + LOCALE_DOMAIN + '.conf')
+
+class pyeject:
+    
+    defaults = {
+        'device' : '/dev/cdrom'
+    }
+
+    def closed_config(self, widget, data = None):
+        self.config.destroy()
+        
+    def save_config(self, widget, data = None):
+        self.save()
+        self.config.destroy()    
+
+    def popup_menu_cb(self, widget, button, time, data = None):
+        if button == 3:
+            if data:
+                data.show_all()
+                data.popup(None, None, None, 3, time)
+        pass
+
+    def config(self, widget, data = None):
+        
+        self.config = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.config.set_title(_('Preferences'))
+        self.config.set_position(gtk.WIN_POS_CENTER)
+        self.config.set_border_width(0)
+        self.config.set_resizable(False)
+                
+        vbox = gtk.VBox(False, 0)
+        vbox.set_border_width(0)
+        
+        hbox1 = gtk.HBox(False, 0)
+        hbox1.set_border_width(2)
+        vbox.pack_start(hbox1, True, True, 0)
+        
+        lab_device = gtk.Label(_('Device'))
+        self.ety_device = gtk.Entry()
+        self.ety_device.set_text(self.get('device'))        
+        btn_device = gtk.Button(_('Default'))
+        
+        btn_device.connect('clicked', self.detect_device)
+        
+        hbox1.pack_start(lab_device, False, True, 2)
+        hbox1.pack_start(self.ety_device, False, True, 2)
+        hbox1.pack_end(btn_device, False, True, 2)
+        
+        hbox = gtk.HBox(False, 0)
+        hbox.set_border_width(2)
+            
+        btn_ok = gtk.Button(stock = gtk.STOCK_SAVE)
+        btn_cancel = gtk.Button(stock = gtk.STOCK_CANCEL)
+        
+        btn_ok.connect('clicked', self.save_config)
+        btn_cancel.connect('clicked', self.closed_config)
+        
+        hbox.pack_start(btn_ok, True, True, 0)
+        hbox.pack_start(btn_cancel, True, True, 0)
+        
+        vbox.pack_start(hbox, False, True, 0)
+        
+        self.config.add(vbox)     
+        self.config.show_all()   
+            
+    def eject_event(self, widget):
+        proc = subprocess.Popen('/usr/bin/eject ' + self.get('device') + ' -T', shell = True, stdout = subprocess.PIPE)
+        proc.wait()
+
+    def detect_device(self, widget):
+        proc = subprocess.Popen('/usr/bin/eject -d', shell = True, stdout = subprocess.PIPE)
+        eject_stdout = proc.communicate()[0].split('\n')[0]
+        proc.wait()
+
+        find_start = eject_stdout.find('/')
+        find_end = eject_stdout.find('\'', find_start)
+        
+        device = str(eject_stdout[find_start:find_end])
+        
+        self.ety_device.set_text(device)
+        
+    def get(self, option):
+        return self.parser.get('DEFAULT', option)    
+    
+    def set(self, option, value):
+        self.parser.set('DEFAULT', option, value)
+        
+    def save(self, prefsFile=CONFIGFILE):
+        self.set('device', str(self.ety_device.get_text()))
+
+        try:
+            self.parser.write(open(prefsFile, 'w'))
+        except StandardError:
+            return
+        
+    def about(self, data = None):
+        about = gtk.AboutDialog()
+        about.set_program_name('pyeject')
+        about.set_version(VERSION)
+        about.set_copyright('© 2012 modywzm.pl')
+        about.set_comments(_('A frontend simple application for eject.'))
+        about.set_website('http://github.com/modywzm/pyeject')
+        about.set_logo_icon_name('drive-optical')
+        about.set_authors([
+            'Marcin Kwapuliński <modywzm@gmail.com>',
+        ])
+
+        if os.path.exists(DOC_DIR) :
+            about.set_license(open(DOC_DIR).read())
+            about.set_wrap_license(True)
+        
+        about.run()
+        about.destroy()
+        
+    def __init__(self):
+        (lang_code, encoding) = locale.getlocale() 
+        gettext.bindtextdomain(LOCALE_DOMAIN, LOCALE_DIR)
+        gettext.textdomain(LOCALE_DOMAIN)
+        gettext.install(LOCALE_DOMAIN)
+        
+        self.parser = ConfigParser.SafeConfigParser(self.defaults)
+
+        try:
+            self.parser.read([CONFIGFILE,])
+        except StandardError:
+            return
+		
+        statusIcon = gtk.StatusIcon()
+
+        menu = gtk.Menu()
+        menuItem = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        menuItem.connect('activate', self.config)
+        menu.append(menuItem)
+        menuItem = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        menuItem.connect('activate', self.about)
+        menu.append(menuItem)
+        separator = gtk.SeparatorMenuItem()
+        menu.append(separator)
+        menuItem = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        menuItem.connect('activate', gtk.main_quit, statusIcon)
+        menu.append(menuItem)
+        
+        statusIcon.set_from_icon_name('pyeject-tray')
+        statusIcon.set_tooltip(_('Eject tray CD/DVD'))
+        statusIcon.connect('activate', self.eject_event)
+        statusIcon.connect('popup-menu', self.popup_menu_cb, menu)
+        statusIcon.set_visible(True)
+
+try:
+	pyeject()
+	gtk.main()
+except KeyboardInterrupt:
+    pass
