@@ -1,6 +1,5 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*-
-
 # pyeject - A frontend simple application for eject.
 # Author: Marcin Kwapuliński <modywzm@gmail.com>
 
@@ -18,7 +17,7 @@ except:
     print('ERROR : All required python dependencies were not found!')
     sys.exit()
 
-VERSION = '0.1'
+VERSION = '0.2'
 LOCALE_DOMAIN = 'pyeject'
 LOCALE_DIR = os.path.join(sys.prefix, 'local', 'share', 'locale')
 LICENCE_DIR = os.path.join(sys.prefix, 'share', 'doc', LOCALE_DOMAIN, 'COPYING')
@@ -31,7 +30,7 @@ class pyeject:
         'default_icon' : '1',
         'icon_path' : ''
     }
-
+    
     def closed_config(self, widget, data = None):
         self.config.destroy()
         
@@ -45,7 +44,7 @@ class pyeject:
                 data.show_all()
                 data.popup(None, None, None, 3, time)
         pass
-
+        
     def config(self, widget, data = None):
         
         self.config = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -128,11 +127,11 @@ class pyeject:
             self.lab_icon_path.set_text(filename)
             
         fc.destroy()
-
+        
     def eject_event(self, widget):
         proc = subprocess.Popen('/usr/bin/eject ' + self.get('device') + ' -T', shell = True, stdout = subprocess.PIPE)
         proc.wait()
-
+        
     def detect_device(self, widget):
         proc = subprocess.Popen('/usr/bin/eject -d', shell = True, stdout = subprocess.PIPE)
         eject_stdout = proc.communicate()[0].split('\n')[0]
@@ -174,7 +173,7 @@ class pyeject:
                 self.statusIcon.set_from_file(icon_path)
             else:
                 self.statusIcon.set_from_icon_name('media-eject')
-
+        
         try:
             self.parser.write(open(prefsFile, 'w'))
         except StandardError:
@@ -191,7 +190,7 @@ class pyeject:
         about.set_authors([
             'Marcin Kwapuliński <modywzm@gmail.com>',
         ])
-
+        
         if os.path.exists(LICENCE_DIR):
             about.set_license(open(LICENCE_DIR).read())
             about.set_wrap_license(True)
@@ -206,12 +205,12 @@ class pyeject:
         gettext.install(LOCALE_DOMAIN)
         
         self.parser = ConfigParser.SafeConfigParser(self.defaults)
-
+        
         try:
             self.parser.read([CONFIGFILE,])
         except StandardError:
             return
-		
+        
         self.statusIcon = gtk.StatusIcon()
 
         menu = gtk.Menu()
@@ -241,7 +240,7 @@ class pyeject:
         self.statusIcon.connect('activate', self.eject_event)
         self.statusIcon.connect('popup-menu', self.popup_menu_cb, menu)
         self.statusIcon.set_visible(True)
-
+        
 if __name__ == '__main__':
     try:
         pyeject()
