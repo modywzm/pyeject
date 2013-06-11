@@ -1,37 +1,50 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Polish translation of pyeject
+# Copyright (C) 2013 Marcin Kwapuliński
+# This file is distributed under the same license as the pyeject package.
+# Marcin Kwapuliński <modywzm@gmail.com>, 2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: pyeject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-10 18:41+0200\n"
-"PO-Revision-Date: 2013-06-10 18:45+0100\n"
-"Last-Translator: modywzm <modywzm@gmail.com>\n"
-"Language-Team: Polish\n"
+"POT-Creation-Date: 2013-06-11 14:26+0200\n"
+"PO-Revision-Date: 2013-06-11 15:03+0100\n"
+"Last-Translator: Marcin Kwapuliński <modywzm@gmail.com>\n"
+"Language-Team:  <modywzm@gmail.com>\n"
+"Language: Polish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.5\n"
 
-#: pyeject:50
+#: pyeject:52
 msgid "Preferences"
 msgstr "Preferencje"
 
-#: pyeject:62
+#: pyeject:64
 msgid "Device"
 msgstr "Urządzenie"
 
-#: pyeject:65
+#: pyeject:67
 msgid "Default"
-msgstr "Domyślny"
+msgstr "Domyślne"
 
-#: pyeject:125
+#: pyeject:77
+msgid "Default icon"
+msgstr "Domyślna ikona"
+
+#: pyeject:88 pyeject:118
+msgid "Select icon"
+msgstr "Wybierz ikone"
+
+#: pyeject:120
+msgid "Image PNG (*.png)"
+msgstr "Obraz PNG (*.png)"
+
+#: pyeject:188
 msgid "A frontend simple application for eject."
 msgstr "Prosta nakładka graficzna na program eject."
 
-#: pyeject:168
+#: pyeject:240
 msgid "Eject tray device"
 msgstr "Wysuń tackę urządzenia"
