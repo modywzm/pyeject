@@ -21,7 +21,7 @@ VERSION = '0.2'
 LOCALE_DOMAIN = 'pyeject'
 LOCALE_DIR = os.path.join(sys.prefix, 'local', 'share', 'locale')
 LICENCE_DIR = os.path.join(sys.prefix, 'share', 'doc', LOCALE_DOMAIN, 'COPYING')
-CONFIGFILE = os.path.expanduser('~/.config/' + LOCALE_DOMAIN + '.conf')
+CONFIG_FILE = os.path.expanduser('~/.config/' + LOCALE_DOMAIN + '.conf')
 
 class pyeject:
     
@@ -31,13 +31,6 @@ class pyeject:
         'icon_path' : ''
     }
     
-    def closed_config(self, widget, data = None):
-        self.config.destroy()
-        
-    def save_config(self, widget, data = None):
-        self.save()
-        self.config.destroy()    
-
     def popup_menu_cb(self, widget, button, time, data = None):
         if button == 3:
             if data:
@@ -46,33 +39,38 @@ class pyeject:
         pass
         
     def config(self, widget, data = None):
-        
-        self.config = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.config.set_title(_('Preferences'))
-        self.config.set_position(gtk.WIN_POS_CENTER)
-        self.config.set_border_width(0)
-        self.config.set_resizable(False)
-       
-        vbox = gtk.VBox(False, 0)
-        vbox.set_border_width(0)
-        
-        hbox1 = gtk.HBox(False, 0)
-        hbox1.set_border_width(2)
-        vbox.pack_start(hbox1, True, True, 0)
+        config = gtk.Dialog(_('Preferences'), None, 0, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK))
+        config.set_position(gtk.WIN_POS_CENTER)
+        config.set_border_width(2)
+        config.set_resizable(False)
+
+        table = gtk.Table(2, 3, False)
+        table.set_border_width(5)
+        table.set_row_spacings(5)
+        table.set_col_spacings(10)
         
         lab_device = gtk.Label(_('Device'))
+        lab_device.set_alignment(0.0, 0.5)
         self.ety_device = gtk.Entry()
         self.ety_device.set_text(self.get('device'))        
         btn_device = gtk.Button(_('Default'))
-        
         btn_device.connect('clicked', self.detect_device)
         
-        hbox1.pack_start(lab_device, False, True, 2)
-        hbox1.pack_start(self.ety_device, False, True, 2)
-        hbox1.pack_end(btn_device, False, True, 2)
+        table.attach(lab_device, 0, 1, 0, 1)
+        table.attach(self.ety_device, 1, 2, 0, 1)
+        table.attach(btn_device, 2, 3, 0, 1)
         
-        hbox2 = gtk.HBox(False, 0)
-        hbox2.set_border_width(2)
+        lab_icon = gtk.Label(_('Icon'))
+        lab_icon.set_alignment(0.0, 0.5)
+        btn_select = gtk.Button(_('Select'))
+        self.ety_icon_path = gtk.Entry()
+        self.ety_icon_path.set_text(self.get('icon_path'))
+        btn_select.connect('clicked', self.select_file)
+        
+        table.attach(lab_icon, 0, 1, 1, 2)
+        table.attach(self.ety_icon_path, 1, 2, 1, 2)
+        table.attach(btn_select, 2, 3, 1, 2)
+        
         self.btn_default_icon = gtk.CheckButton(_('Default icon'))
         
         if self.get('default_icon') == '1':
@@ -80,41 +78,19 @@ class pyeject:
         else:
             self.btn_default_icon.set_active(False)
         
-        hbox2.pack_start(self.btn_default_icon, True, True, 0)
+        config.vbox.pack_start(table, False, True, 2)
+        config.vbox.pack_start(self.btn_default_icon, False, True, 2)
+        config.show_all()
         
-        hbox3 = gtk.HBox(False, 0)
-        hbox3.set_border_width(2)
-        btn_select = gtk.Button(_('Select icon'))
-        hbox3.pack_start(btn_select, True, True, 0)
-        btn_select.connect('clicked', self.select_file)
+        response =  config.run()
         
-        hbox4 = gtk.HBox(False, 0)
-        hbox4.set_border_width(2)
-        self.lab_icon_path = gtk.Label(self.get('icon_path'))
-        hbox4.pack_start(self.lab_icon_path, True, True, 0)
+        if response == gtk.RESPONSE_OK:
+            self.save()
         
-        hbox = gtk.HBox(False, 0)
-        hbox.set_border_width(2)
- 
-        btn_ok = gtk.Button(stock = gtk.STOCK_SAVE)
-        btn_cancel = gtk.Button(stock = gtk.STOCK_CANCEL)
-        
-        btn_ok.connect('clicked', self.save_config)
-        btn_cancel.connect('clicked', self.closed_config)
-        
-        hbox.pack_start(btn_ok, True, True, 0)
-        hbox.pack_start(btn_cancel, True, True, 0)
-        
-        vbox.pack_start(hbox2, False, True, 0)
-        vbox.pack_start(hbox3, False, True, 0)
-        vbox.pack_start(hbox4, False, True, 0)
-        vbox.pack_start(hbox, False, True, 0)
-
-        self.config.add(vbox)
-        self.config.show_all()
+        config.destroy()
         
     def select_file(self, widget):
-        fc = gtk.FileChooserDialog(title = _('Select icon'), parent = self.config, action = gtk.FILE_CHOOSER_ACTION_OPEN, buttons = (gtk.STOCK_OK,gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL,gtk.RESPONSE_REJECT))
+        fc = gtk.FileChooserDialog(_('Select icon'), None, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
         filter_png = gtk.FileFilter()
         filter_png.set_name(_('Image PNG (*.png)'))
         filter_png.add_mime_type('image/png')
@@ -124,7 +100,7 @@ class pyeject:
         
         if response == gtk.RESPONSE_ACCEPT:
             filename = fc.get_filename()
-            self.lab_icon_path.set_text(filename)
+            self.ety_icon_path.set_text(filename)
             
         fc.destroy()
         
@@ -150,32 +126,32 @@ class pyeject:
     def set(self, option, value):
         self.parser.set('DEFAULT', option, value)
         
-    def save(self, prefsFile = CONFIGFILE):
+    def save(self, config_file = CONFIG_FILE):
         self.set('device', str(self.ety_device.get_text()))
         default_icon_state = self.btn_default_icon.get_active()
-        icon_path = self.lab_icon_path.get_text()
+        icon_path = self.ety_icon_path.get_text()
         
         if default_icon_state:
             self.set('default_icon', str('1'))
-            self.statusIcon.set_from_icon_name('media-eject')
+            self.status_icon.set_from_icon_name('media-eject')
         else:
             self.set('default_icon', str('0'))
             
             if os.path.exists(icon_path):
-                self.statusIcon.set_from_file(icon_path)
+                self.status_icon.set_from_file(icon_path)
             else:
-                self.statusIcon.set_from_icon_name('media-eject')
+                self.status_icon.set_from_icon_name('media-eject')
         
         if icon_path:
             self.set('icon_path', str(icon_path))
             
             if os.path.exists(icon_path) and not default_icon_state:
-                self.statusIcon.set_from_file(icon_path)
+                self.status_icon.set_from_file(icon_path)
             else:
-                self.statusIcon.set_from_icon_name('media-eject')
+                self.status_icon.set_from_icon_name('media-eject')
         
         try:
-            self.parser.write(open(prefsFile, 'w'))
+            self.parser.write(open(config_file, 'w'))
         except StandardError:
             return
         
@@ -207,39 +183,39 @@ class pyeject:
         self.parser = ConfigParser.SafeConfigParser(self.defaults)
         
         try:
-            self.parser.read([CONFIGFILE,])
+            self.parser.read(CONFIG_FILE)
         except StandardError:
             return
         
-        self.statusIcon = gtk.StatusIcon()
+        self.status_icon = gtk.StatusIcon()
 
         menu = gtk.Menu()
-        menuItem = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
-        menuItem.connect('activate', self.config)
-        menu.append(menuItem)
-        menuItem = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
-        menuItem.connect('activate', self.about)
-        menu.append(menuItem)
+        menu_item = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        menu_item.connect('activate', self.config)
+        menu.append(menu_item)
+        menu_item = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        menu_item.connect('activate', self.about)
+        menu.append(menu_item)
         separator = gtk.SeparatorMenuItem()
         menu.append(separator)
-        menuItem = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-        menuItem.connect('activate', gtk.main_quit, self.statusIcon)
-        menu.append(menuItem)
+        menu_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        menu_item.connect('activate', gtk.main_quit, self.status_icon)
+        menu.append(menu_item)
         
         default_icon = self.get('default_icon')
         icon_path = self.get('icon_path')
         
         if default_icon == '1':
-            self.statusIcon.set_from_icon_name('media-eject')
+            self.status_icon.set_from_icon_name('media-eject')
         elif os.path.exists(icon_path):
-            self.statusIcon.set_from_file(icon_path)
+            self.status_icon.set_from_file(icon_path)
         else:
-            self.statusIcon.set_from_icon_name('media-eject')
+            self.status_icon.set_from_icon_name('media-eject')
         
-        self.statusIcon.set_tooltip(_('Eject tray device'))
-        self.statusIcon.connect('activate', self.eject_event)
-        self.statusIcon.connect('popup-menu', self.popup_menu_cb, menu)
-        self.statusIcon.set_visible(True)
+        self.status_icon.set_tooltip(_('Eject tray device'))
+        self.status_icon.connect('activate', self.eject_event)
+        self.status_icon.connect('popup-menu', self.popup_menu_cb, menu)
+        self.status_icon.set_visible(True)
         
 if __name__ == '__main__':
     try:
