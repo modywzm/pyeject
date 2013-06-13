@@ -17,34 +17,42 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.5\n"
 
-#: pyeject:52
+#: pyeject:42
 msgid "Preferences"
 msgstr "Preferencje"
 
-#: pyeject:64
+#: pyeject:52
 msgid "Device"
 msgstr "Urządzenie"
 
-#: pyeject:67
+#: pyeject:56
 msgid "Default"
 msgstr "Domyślne"
 
-#: pyeject:77
+#: pyeject:63
+msgid "Icon"
+msgstr "Ikona"
+
+#: pyeject:65
+msgid "Select"
+msgstr "Wybierz"
+
+#: pyeject:74
 msgid "Default icon"
 msgstr "Domyślna ikona"
 
-#: pyeject:88 pyeject:118
+#: pyeject:93
 msgid "Select icon"
 msgstr "Wybierz ikone"
 
-#: pyeject:120
+#: pyeject:95
 msgid "Image PNG (*.png)"
 msgstr "Obraz PNG (*.png)"
 
-#: pyeject:188
+#: pyeject:163
 msgid "A frontend simple application for eject."
 msgstr "Prosta nakładka graficzna na program eject."
 
-#: pyeject:240
+#: pyeject:215
 msgid "Eject tray device"
 msgstr "Wysuń tackę urządzenia"
